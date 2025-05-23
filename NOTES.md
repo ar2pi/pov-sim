@@ -1,0 +1,7 @@
+
+- [Get OTLP token](https://grafana.com/orgs/arthurpicerna/stacks/1258769/otlp-info)
+- [Alloy receiver live debugging](http://localhost:12345/debug/otelcol.receiver.otlp.default)
+- [airlines metrics](https://arthurpicerna.grafana.net/a/grafana-metricsdrilldown-app/drilldown?nativeHistogramMetric=&layout=grid&filters-rule=&filters-prefix=&filters-suffix=&from=now-1h&to=now&timezone=browser&var-otel_resources=&var-filters=service_name%7C%3D%7Cairlines&var-otel_and_metric_filters=&var-deployment_environment=undefined&var-labelsWingman=%28none%29&search_txt=&var-metrics-reducer-sort-by=default&var-ds=grafanacloud-prom&var-other_metric_filters=)
+- [flights metrics](https://arthurpicerna.grafana.net/a/grafana-metricsdrilldown-app/drilldown?nativeHistogramMetric=&layout=grid&filters-rule=&filters-prefix=&filters-suffix=&from=now-1h&to=now&timezone=browser&var-otel_resources=&var-filters=service_name%7C%3D%7Cflights&var-otel_and_metric_filters=&var-deployment_environment=undefined&var-labelsWingman=%28none%29&search_txt=&var-metrics-reducer-sort-by=default&var-ds=grafanacloud-prom&var-other_metric_filters=)
+- [logs](https://arthurpicerna.grafana.net/a/grafana-lokiexplore-app/explore)
+- [traces](https://arthurpicerna.grafana.net/a/grafana-exploretraces-app/explore)

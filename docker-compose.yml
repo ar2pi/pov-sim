@@ -1,20 +1,54 @@
-version: '1'
 services:
+  alloy:
+    image: grafana/alloy:latest
+    ports:
+      - "12345:12345"               # alloy UI
+    environment:
+      - GRAFANA_CLOUD_OTLP_USER     # from .env
+      - GRAFANA_CLOUD_OTLP_TOKEN    # from .env
+      - GRAFANA_CLOUD_OTLP_ENDPOINT # from .env
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - alloy-data:/var/lib/alloy/data
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
   airlines:
-    build: 
+    build:
       context: ./airlines
     ports:
       - "8080:8080"
+    environment:
+      - OTEL_SERVICE_NAME=airlines
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=airlines,deployment.environment=local
   flights:
-    build: 
+    build:
       context: ./flights
     ports:
       - "5001:5001"
+    environment:
+      - OTEL_SERVICE_NAME=flights
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=flights,deployment.environment=local
+      # Debug settings
+      - OTEL_LOG_LEVEL=debug
+      - OTEL_PYTHON_LOG_LEVEL=debug
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
   frontend:
-    build: 
+    build:
       context: ./frontend
     ports:
       - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
+
+volumes:
+  alloy-data:
