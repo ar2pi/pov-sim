@@ -25,6 +25,11 @@ services:
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
       - OTEL_RESOURCE_ATTRIBUTES=service.name=airlines,deployment.environment=local
+      # Debug settings
+      - OTEL_LOG_LEVEL=debug
+      - OTEL_JAVAAGENT_DEBUG=true
+      # Spring logging
+      - LOGGING_LEVEL_ROOT=DEBUG
   flights:
     build:
       context: ./flights
@@ -38,9 +43,6 @@ services:
       # Debug settings
       - OTEL_LOG_LEVEL=debug
       - OTEL_PYTHON_LOG_LEVEL=debug
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=otlp
-      - OTEL_LOGS_EXPORTER=otlp
   frontend:
     build:
       context: ./frontend
