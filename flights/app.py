@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flasgger import Swagger
 from flask import Flask, jsonify, request
@@ -28,14 +29,15 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 # Flask instrumentation
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
+OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Set up metrics
 metric_reader = PeriodicExportingMetricReader(
     # https://opentelemetry-python.readthedocs.io/en/latest/exporter/otlp/otlp.html#opentelemetry.exporter.otlp.proto.grpc.metric_exporter.OTLPMetricExporter
-    # @TODO: use env var
-    OTLPMetricExporter(endpoint="http://alloy:4317")
+    OTLPMetricExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT)
 )
 meter_provider = MeterProvider(metric_readers=[metric_reader])
 metrics.set_meter_provider(meter_provider)
@@ -46,8 +48,7 @@ set_logger_provider(logger_provider)
 logger_provider.add_log_record_processor(
     BatchLogRecordProcessor(
         # https://opentelemetry-python.readthedocs.io/en/latest/exporter/otlp/otlp.html#opentelemetry.exporter.otlp.proto.grpc._log_exporter.OTLPLogExporter
-        # @TODO: use env var
-        OTLPLogExporter(endpoint="http://alloy:4317")
+        OTLPLogExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT)
     )
 )
 logging_handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
@@ -57,8 +58,7 @@ logging.getLogger().addHandler(logging_handler)
 tracer_provider = TracerProvider()
 span_processor = BatchSpanProcessor(
     # https://opentelemetry-python.readthedocs.io/en/latest/exporter/otlp/otlp.html#opentelemetry.exporter.otlp.proto.grpc.trace_exporter.OTLPSpanExporter
-    # @TODO: use env var
-    OTLPSpanExporter(endpoint="http://alloy:4317")
+    OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT)
 )
 tracer_provider.add_span_processor(span_processor)
 trace.set_tracer_provider(tracer_provider)

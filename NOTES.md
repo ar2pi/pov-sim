@@ -1,3 +1,10 @@
+# Notes
+
+```sh
+make up
+while true; do ./scripts/airlines-loadgen.sh; done
+while true; do ./scripts/flights-loadgen.sh; done
+```
 
 - [Get OTLP token](https://grafana.com/orgs/arthurpicerna/stacks/1258769/otlp-info)
 - [Alloy receiver live debugging](http://localhost:12345/debug/otelcol.receiver.otlp.default)
