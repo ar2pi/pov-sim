@@ -7,7 +7,9 @@ services:
       - GRAFANA_CLOUD_OTLP_USER     # from .env
       - GRAFANA_CLOUD_OTLP_TOKEN    # from .env
       - GRAFANA_CLOUD_OTLP_ENDPOINT # from .env
+      - GRAFANA_CLOUD_PYROSCOPE_SERVER_ADDRESS  # from .env
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./alloy/config.alloy:/etc/alloy/config.alloy
       - alloy-data:/var/lib/alloy/data
     command:
@@ -15,6 +17,18 @@ services:
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
+    # Privileged mode needed to discover processes on host, also to use pyroscope.java and pyroscope.ebpf, bummers
+    # (=> better to use sdk instrumentation in cases where that might be a problem)
+    # https://github.com/grafana/pyroscope/blob/main/examples/grafana-alloy-auto-instrumentation/java/docker/docker-compose.yml#L20-L21
+    # https://grafana.com/docs/pyroscope/latest/configure-client/grafana-alloy/java/#set-privileges-for-the-collector
+    # https://grafana.com/docs/pyroscope/latest/configure-client/grafana-alloy/ebpf/configuration/#privileges
+    privileged: true
+    pid: host
+  # Local pyroscope server for testing purposes
+  pyroscope:
+    image: grafana/pyroscope:latest
+    ports:
+      - 4040:4040
   airlines:
     build:
       context: ./airlines
@@ -29,7 +43,7 @@ services:
       - OTEL_LOG_LEVEL=debug
       - OTEL_JAVAAGENT_DEBUG=true
       # Spring logging
-      - LOGGING_LEVEL_ROOT=DEBUG
+      # - LOGGING_LEVEL_ROOT=DEBUG
   flights:
     build:
       context: ./flights

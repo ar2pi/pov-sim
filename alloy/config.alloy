@@ -41,3 +41,75 @@ otelcol.exporter.otlphttp "default" {
     auth     = otelcol.auth.basic.default.handler
   }
 }
+
+// start: Pyroscope configuration
+
+// See reference doc for more info https://grafana.com/docs/alloy/next/reference/components/discovery/discovery.docker/
+discovery.docker "local_containers" {
+  // http://localhost:12345/component/discovery.docker.all
+	host = "unix:///var/run/docker.sock"
+}
+
+// See reference doc for more info https://grafana.com/docs/alloy/next/reference/components/discovery/discovery.process/
+discovery.process "all" {
+  // http://localhost:12345/component/discovery.process.all
+  join = discovery.docker.local_containers.targets
+}
+
+discovery.relabel "airlines" {
+    targets = discovery.process.all.targets
+    // Filter needed containers based on docker labels
+    rule {
+        source_labels = ["__meta_docker_container_name"]
+        regex = ".*airlines.*"
+        action = "keep"
+    }
+    // provide arbitrary service_name label, otherwise it will default to value of __meta_docker_container_name
+    rule {
+        source_labels = ["__meta_docker_container_name"]
+        regex = ".*airlines.*"
+        action = "replace"
+        target_label = "service_name"
+        replacement = "airlines"
+    }
+}
+
+// https://grafana.com/docs/alloy/latest/reference/components/pyroscope/pyroscope.java/
+pyroscope.java "java" {
+  profiling_config {
+    interval = "15s"
+    alloc = "512k"
+    cpu = true
+    lock = "10ms"
+    sample_rate = 100
+  }
+  //forward_to = [pyroscope.write.local.receiver]
+  forward_to = [pyroscope.write.grafana_cloud.receiver]
+  targets = discovery.relabel.airlines.output
+}
+
+pyroscope.write "local" {
+  // Send metrics to a locally running Pyroscope instance.
+  endpoint {
+    url = "http://pyroscope:4040"
+  }
+  external_labels = {
+    "env" = "local",
+  }
+}
+
+pyroscope.write "grafana_cloud" {
+  // Send metrics to Grafana Cloud
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PYROSCOPE_SERVER_ADDRESS")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_OTLP_USER")
+      password = sys.env("GRAFANA_CLOUD_OTLP_TOKEN")
+    }
+  }
+  external_labels = {
+    "env" = "local",
+  }
+}
+
+// end: Pyroscope configuration
