@@ -29,7 +29,9 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 # Flask instrumentation
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
-OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv(
+    "OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317"
+)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -68,21 +70,22 @@ app = Flask(__name__)
 # Instrument Flask app and system metrics
 # https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/flask/flask.html
 FlaskInstrumentor().instrument_app(
-  app,
-  tracer_provider=tracer_provider,
-  meter_provider=meter_provider,
+    app,
+    tracer_provider=tracer_provider,
+    meter_provider=meter_provider,
 )
 # https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/logging/logging.html
 LoggingInstrumentor().instrument(
-  tracer_provider=tracer_provider,
-  set_logging_format=True,
-  log_level=logging.DEBUG,
+    tracer_provider=tracer_provider,
+    set_logging_format=True,
+    log_level=logging.DEBUG,
 )
 # https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/system_metrics/system_metrics.html
 SystemMetricsInstrumentor().instrument()
 
 Swagger(app)
 CORS(app)
+
 
 # Add a test span to verify tracing
 @app.before_request
@@ -92,6 +95,7 @@ def before_request():
         span.set_attribute("test.attribute", "test-value")
         logger.info("Test span created")
 
+
 # Add a custom metric
 meter = metrics.get_meter(__name__)
 request_counter = meter.create_counter(
@@ -100,11 +104,13 @@ request_counter = meter.create_counter(
     unit="1",
 )
 
+
 @app.before_request
 def count_requests():
     request_counter.add(1, {"path": request.path, "method": request.method})
 
-@app.route('/health', methods=['GET'])
+
+@app.route("/health", methods=["GET"])
 def health():
     """Health endpoint
     ---
@@ -115,7 +121,8 @@ def health():
     logger.info("Health check endpoint called")
     return jsonify({"status": "healthy"}), 200
 
-@app.route("/", methods=['GET'])
+
+@app.route("/", methods=["GET"])
 def home():
     """No-op home endpoint
     ---
@@ -124,6 +131,7 @@ def home():
         description: Returns ok
     """
     return jsonify({"message": "ok"}), 200
+
 
 @app.route("/flights/<airline>", methods=["GET"])
 def get_flights(airline):
@@ -146,9 +154,12 @@ def get_flights(airline):
     """
     status_code = request.args.get("raise")
     if status_code:
-      raise Exception(f"Encountered {status_code} error") # pylint: disable=broad-exception-raised
+        raise Exception(
+            f"Encountered {status_code} error"
+        )  # pylint: disable=broad-exception-raised
     random_int = get_random_int(100, 999)
     return jsonify({airline: [random_int]}), 200
+
 
 @app.route("/flight", methods=["POST"])
 def book_flight():
@@ -176,11 +187,23 @@ def book_flight():
     """
     status_code = request.args.get("raise")
     if status_code:
-      raise Exception(f"Encountered {status_code} error") # pylint: disable=broad-exception-raised
+        raise Exception(
+            f"Encountered {status_code} error"
+        )  # pylint: disable=broad-exception-raised
     passenger_name = request.args.get("passenger_name")
     flight_num = request.args.get("flight_num")
     booking_id = get_random_int(100, 999)
-    return jsonify({"passenger_name": passenger_name, "flight_num": flight_num, "booking_id": booking_id}), 200
+    return (
+        jsonify(
+            {
+                "passenger_name": passenger_name,
+                "flight_num": flight_num,
+                "booking_id": booking_id,
+            }
+        ),
+        200,
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

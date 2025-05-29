@@ -57,21 +57,21 @@ discovery.process "all" {
 }
 
 discovery.relabel "airlines" {
-    targets = discovery.process.all.targets
-    // Filter needed containers based on docker labels
-    rule {
-        source_labels = ["__meta_docker_container_name"]
-        regex = ".*airlines.*"
-        action = "keep"
-    }
-    // provide arbitrary service_name label, otherwise it will default to value of __meta_docker_container_name
-    rule {
-        source_labels = ["__meta_docker_container_name"]
-        regex = ".*airlines.*"
-        action = "replace"
-        target_label = "service_name"
-        replacement = "airlines"
-    }
+  targets = discovery.process.all.targets
+  // Filter needed containers based on docker labels
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = ".*airlines.*"
+    action = "keep"
+  }
+  // provide arbitrary service_name label, otherwise it will default to value of __meta_docker_container_name
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = ".*airlines.*"
+    action = "replace"
+    target_label = "service_name"
+    replacement = "airlines"
+  }
 }
 
 // https://grafana.com/docs/alloy/latest/reference/components/pyroscope/pyroscope.java/
