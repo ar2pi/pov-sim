@@ -74,6 +74,7 @@ discovery.relabel "airlines" {
   }
 }
 
+// For airlines svc java auto instrumentation
 // https://grafana.com/docs/alloy/latest/reference/components/pyroscope/pyroscope.java/
 pyroscope.java "java" {
   profiling_config {
@@ -86,6 +87,16 @@ pyroscope.java "java" {
   //forward_to = [pyroscope.write.local.receiver]
   forward_to = [pyroscope.write.grafana_cloud.receiver]
   targets = discovery.relabel.airlines.output
+}
+
+// For flights svc python sdk instrumentation
+// https://grafana.com/docs/pyroscope/latest/configure-client/grafana-alloy/receive_profiles/#basic-receiving-setup
+pyroscope.receive_http "default" {
+  http {
+    listen_address = "0.0.0.0"
+    listen_port = 4041
+  }
+  forward_to = [pyroscope.write.grafana_cloud.receiver]
 }
 
 pyroscope.write "local" {

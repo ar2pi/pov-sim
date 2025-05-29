@@ -16,6 +16,9 @@ services:
       - run
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
+      # Stability level "public-preview" is needed to use pyroscope.receive_http at time of writing
+      # https://grafana.com/docs/pyroscope/latest/configure-client/grafana-alloy/receive_profiles/
+      - --stability.level=public-preview
       - /etc/alloy/config.alloy
     # Privileged mode needed to discover processes on host, also to use pyroscope.java and pyroscope.ebpf, bummers
     # (=> better to use sdk instrumentation in cases where that might be a problem)
@@ -57,6 +60,8 @@ services:
       # Debug settings
       - OTEL_LOG_LEVEL=debug
       - OTEL_PYTHON_LOG_LEVEL=debug
+      # - PYROSCOPE_SERVER_ADDRESS=http://pyroscope:4040  # test locally
+      - PYROSCOPE_SERVER_ADDRESS=http://alloy:4041        # send to grafana cloud through alloy
   frontend:
     build:
       context: ./frontend

@@ -26,11 +26,18 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
+# Profiles
+import pyroscope
+from pyroscope.otel import PyroscopeSpanProcessor
+
 # Flask instrumentation
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
 OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv(
     "OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317"
+)
+PYROSCOPE_SERVER_ADDRESS = os.getenv(
+    "PYROSCOPE_SERVER_ADDRESS", "http://localhost:4040"
 )
 
 logging.basicConfig(level=logging.DEBUG)
@@ -63,7 +70,14 @@ span_processor = BatchSpanProcessor(
     OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT)
 )
 tracer_provider.add_span_processor(span_processor)
+tracer_provider.add_span_processor(PyroscopeSpanProcessor())
 trace.set_tracer_provider(tracer_provider)
+
+# Set up profiles
+pyroscope.configure(
+    application_name="flights",
+    server_address=PYROSCOPE_SERVER_ADDRESS,
+)
 
 app = Flask(__name__)
 

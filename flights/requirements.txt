@@ -7,3 +7,5 @@ opentelemetry-exporter-otlp-proto-grpc==1.33.1
 opentelemetry-instrumentation-flask==0.54b1
 opentelemetry-instrumentation-logging==0.54b1
 opentelemetry-instrumentation-system-metrics==0.54b1
+pyroscope-io==0.8.11
+pyroscope-otel==0.4.1
